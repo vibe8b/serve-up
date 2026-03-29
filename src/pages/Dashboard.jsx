@@ -10,7 +10,6 @@ export default function Dashboard() {
   const bookings = (merchant.bookings || []).filter((b) => b.status !== 'cancelled')
   const hasBookings = bookings.length > 0
 
-  // Refresh bookings on mount
   useEffect(() => { refreshBookings() }, [refreshBookings])
 
   const todayStr = new Date().toISOString().split('T')[0]
@@ -21,7 +20,7 @@ export default function Dashboard() {
   const todayRevenue = todayBookings.reduce((sum, b) => sum + Number(b.servicePrice), 0)
   const netEarnings = totalRevenue - bookings.length * PLATFORM_FEE
 
-  const bookingLink = `${window.location.origin}/book/${merchant.slug}`
+  const bookingLink = `${window.location.origin}${window.location.pathname}#/book/${merchant.slug}`
   const copyLink = () => navigator.clipboard.writeText(bookingLink)
 
   const handleCancel = async (id) => {
@@ -32,92 +31,89 @@ export default function Dashboard() {
   return (
     <div>
       {/* Booking link banner */}
-      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="rounded-3xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ background: 'var(--accentBg)', border: '1px solid var(--border)' }}>
         <div>
-          <p className="text-emerald-400 font-bold text-sm">Your booking page is live</p>
-          <p className="text-zinc-500 text-xs mt-0.5">Share with clients to start getting bookings.</p>
+          <p className="font-bold text-sm" style={{ color: 'var(--accentText)' }}>Your booking page is live</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--textMuted)' }}>Share with clients to start getting bookings.</p>
         </div>
         <div className="flex items-center gap-2">
-          <code className="text-emerald-400 text-xs bg-zinc-900 px-3 py-2 rounded-lg truncate max-w-[180px]">
+          <code className="text-xs px-3 py-2 rounded-xl truncate max-w-[180px]" style={{ background: 'var(--bgCard)', color: 'var(--accentText)', border: '1px solid var(--border)' }}>
             /book/{merchant.slug}
           </code>
-          <button onClick={copyLink} className="px-3 py-2 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-400 transition shrink-0">
+          <button onClick={copyLink} className="px-4 py-2 text-xs font-bold rounded-xl transition hover:opacity-90" style={{ background: 'var(--accent)', color: 'var(--btnText)' }}>
             Copy
           </button>
-          <button onClick={() => navigate(`/book/${merchant.slug}`)} className="px-3 py-2 bg-zinc-800 text-zinc-300 text-xs font-medium rounded-lg hover:bg-zinc-700 transition shrink-0">
+          <button onClick={() => navigate(`/book/${merchant.slug}`)} className="px-4 py-2 text-xs font-medium rounded-xl transition" style={{ background: 'var(--bgCard)', color: 'var(--textSecondary)', border: '1px solid var(--border)' }}>
             View
           </button>
         </div>
       </div>
 
       {!hasBookings ? (
-        <div className="text-center py-16 bg-zinc-900 border border-zinc-800 rounded-2xl">
-          <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-zinc-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <div className="text-center py-20 rounded-3xl" style={{ background: 'var(--bgCard)', border: '1px solid var(--border)' }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: 'var(--accentBg)' }}>
+            <svg className="w-8 h-8" fill="none" stroke="var(--accent)" strokeWidth={1.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
             </svg>
           </div>
-          <p className="text-zinc-300 font-medium mb-1">No bookings yet</p>
-          <p className="text-zinc-600 text-sm mb-5 max-w-xs mx-auto">Share your link. Your first booking shows up here.</p>
-          <div className="flex gap-2 justify-center">
-            <button onClick={copyLink} className="px-4 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-400 transition">Copy Link</button>
-            <button onClick={() => navigate(`/book/${merchant.slug}`)} className="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl text-sm font-medium hover:bg-zinc-700 transition">Test Booking</button>
+          <p className="font-semibold mb-1" style={{ color: 'var(--text)' }}>No bookings yet</p>
+          <p className="text-sm mb-6 max-w-xs mx-auto" style={{ color: 'var(--textMuted)' }}>Share your link. Your first booking shows up here.</p>
+          <div className="flex gap-3 justify-center">
+            <button onClick={copyLink} className="px-5 py-3 rounded-2xl text-sm font-bold transition hover:opacity-90" style={{ background: 'var(--accent)', color: 'var(--btnText)' }}>Copy Link</button>
+            <button onClick={() => navigate(`/book/${merchant.slug}`)} className="px-5 py-3 rounded-2xl text-sm font-medium transition" style={{ background: 'var(--bgCard)', color: 'var(--textSecondary)', border: '1px solid var(--border)' }}>Test Booking</button>
           </div>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Next Client</p>
+            <div className="rounded-3xl p-6" style={{ background: 'var(--bgCard)', border: '1px solid var(--border)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--textMuted)' }}>Next Client</p>
               {nextBooking ? (
                 <div className="mt-2">
-                  <p className="text-white font-bold text-lg">{nextBooking.clientName}</p>
-                  <p className="text-zinc-500 text-sm">{nextBooking.service?.name || 'Service'} · {nextBooking.time}</p>
+                  <p className="font-bold text-lg" style={{ color: 'var(--text)' }}>{nextBooking.clientName}</p>
+                  <p className="text-sm" style={{ color: 'var(--textSecondary)' }}>{nextBooking.service?.name || 'Service'} · {nextBooking.time}</p>
                 </div>
               ) : (
-                <p className="text-zinc-600 text-sm mt-2">No more today</p>
+                <p className="text-sm mt-2" style={{ color: 'var(--textMuted)' }}>No more today</p>
               )}
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Today</p>
-              <p className="text-white font-bold text-2xl mt-2">{todayBookings.length}</p>
-              <p className="text-zinc-600 text-xs">bookings · ${todayRevenue.toFixed(2)}</p>
+            <div className="rounded-3xl p-6" style={{ background: 'var(--bgCard)', border: '1px solid var(--border)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--textMuted)' }}>Today</p>
+              <p className="font-bold text-2xl mt-2" style={{ color: 'var(--text)' }}>{todayBookings.length}</p>
+              <p className="text-xs" style={{ color: 'var(--textMuted)' }}>bookings · ${todayRevenue.toFixed(2)}</p>
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Total Earned</p>
-              <p className="text-emerald-400 font-bold text-2xl mt-2">${netEarnings.toFixed(2)}</p>
-              <p className="text-zinc-600 text-xs">{bookings.length} bookings</p>
+            <div className="rounded-3xl p-6" style={{ background: 'var(--bgCard)', border: '1px solid var(--border)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--textMuted)' }}>Total Earned</p>
+              <p className="font-bold text-2xl mt-2" style={{ color: 'var(--accent)' }}>${netEarnings.toFixed(2)}</p>
+              <p className="text-xs" style={{ color: 'var(--textMuted)' }}>{bookings.length} bookings</p>
             </div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-zinc-800">
-              <h2 className="font-semibold text-white text-sm">All Bookings</h2>
+          <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--bgCard)', border: '1px solid var(--border)' }}>
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+              <h2 className="font-semibold text-sm" style={{ color: 'var(--text)' }}>All Bookings</h2>
             </div>
-            <div className="divide-y divide-zinc-800/50">
+            <div>
               {bookings.map((b) => (
-                <div key={b.id} className="px-5 py-3.5 flex items-center justify-between">
+                <div key={b.id} className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400">
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-bold" style={{ background: 'var(--accentBg)', color: 'var(--accentText)' }}>
                       {b.clientName.split(' ').map((n) => n[0]).join('').toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-white font-medium text-sm">{b.clientName}</p>
-                      <p className="text-zinc-500 text-xs">{b.service?.name || 'Service'} · {b.date} · {b.time}</p>
+                      <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>{b.clientName}</p>
+                      <p className="text-xs" style={{ color: 'var(--textMuted)' }}>{b.service?.name || 'Service'} · {b.date} · {b.time}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-white font-semibold text-sm">${Number(b.servicePrice).toFixed(2)}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                      b.paid ? 'bg-emerald-500/15 text-emerald-400' : 'bg-zinc-800 text-zinc-500'
-                    }`}>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--text)' }}>${Number(b.servicePrice).toFixed(2)}</span>
+                    <span className="px-2.5 py-1 rounded-xl text-[10px] font-bold" style={{
+                      background: b.paid ? 'var(--accentBg)' : 'var(--bgInput)',
+                      color: b.paid ? 'var(--accentText)' : 'var(--textMuted)',
+                    }}>
                       {b.paid ? 'Paid' : 'Pending'}
                     </span>
-                    <button
-                      onClick={() => handleCancel(b.id)}
-                      className="p-1 text-zinc-600 hover:text-red-400 transition"
-                      title="Cancel booking"
-                    >
+                    <button onClick={() => handleCancel(b.id)} className="p-1.5 rounded-xl transition hover:opacity-60" style={{ color: 'var(--textMuted)' }} title="Cancel">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                       </svg>

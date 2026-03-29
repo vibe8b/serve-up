@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+:root {
+  --bg: #FFF5F0;
+  --bgCard: #FFFFFF;
+  --bgSidebar: #FFF0E8;
+  --bgInput: #FFF8F4;
+  --border: #FFE4D6;
+  --borderActive: #FF9B71;
+  --text: #2D1B0E;
+  --textSecondary: #8B6E5A;
+  --textMuted: #BFA28E;
+  --accent: #FF9B71;
+  --accentHover: #FF8555;
+  --accentBg: #FFF0E8;
+  --accentText: #D4622A;
+  --success: #7EC8A4;
+  --btnText: #FFFFFF;
+  --booking: #EEF6FF;
+  --bookingAccent: #7BB8E8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}

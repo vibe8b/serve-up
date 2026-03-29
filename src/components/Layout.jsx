@@ -15,28 +15,26 @@ export default function Layout() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex min-h-screen bg-zinc-950">
-      <aside className="w-52 bg-zinc-950 border-r border-zinc-800/50 flex flex-col shrink-0">
-        <div className="p-5 border-b border-zinc-800/50">
-          <h1 className="text-base font-black text-white tracking-tight">
-            Serve<span className="text-emerald-400">Up</span>
+    <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
+      <aside className="w-56 flex flex-col shrink-0" style={{ background: 'var(--bgSidebar)', borderRight: '1px solid var(--border)' }}>
+        <div className="p-5" style={{ borderBottom: '1px solid var(--border)' }}>
+          <h1 className="text-lg font-black tracking-tight" style={{ color: 'var(--text)' }}>
+            Serve<span style={{ color: 'var(--accent)' }}>Up</span>
           </h1>
-          <p className="text-[11px] text-zinc-600 mt-0.5 truncate">{merchant.businessName}</p>
+          <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--textMuted)' }}>{merchant.businessName}</p>
         </div>
-        <nav className="flex-1 p-2.5 space-y-0.5">
+        <nav className="flex-1 p-3 space-y-1">
           {NAV.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
-                }`
-              }
+              className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all"
+              style={({ isActive }) => ({
+                background: isActive ? 'var(--accentBg)' : 'transparent',
+                color: isActive ? 'var(--accentText)' : 'var(--textSecondary)',
+              })}
             >
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
               </svg>
               {label}
@@ -44,10 +42,11 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-2.5 border-t border-zinc-800/50">
+        <div className="p-3" style={{ borderTop: '1px solid var(--border)' }}>
           <button
             onClick={() => navigate(`/book/${merchant.slug}`)}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 transition"
+            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition"
+            style={{ background: 'var(--accentBg)', color: 'var(--accentText)' }}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -56,19 +55,24 @@ export default function Layout() {
           </button>
         </div>
 
-        <div className="p-3 border-t border-zinc-800/50">
+        <div className="p-3" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="flex items-center gap-2.5">
             {merchant.photo ? (
-              <img src={merchant.photo} alt="" className="w-7 h-7 rounded-full object-cover ring-1 ring-zinc-700" />
+              <img src={merchant.photo} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: '2px solid var(--border)' }} />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-xs">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs" style={{ background: 'var(--accentBg)', color: 'var(--accentText)' }}>
                 {merchant.name?.[0]?.toUpperCase() || '?'}
               </div>
             )}
-            <div className="text-xs min-w-0">
-              <p className="font-medium text-zinc-300 truncate">{merchant.name}</p>
-              <p className="text-zinc-600 truncate">{merchant.category}</p>
+            <div className="text-xs min-w-0 flex-1">
+              <p className="font-semibold truncate" style={{ color: 'var(--text)' }}>{merchant.name}</p>
+              <p className="truncate" style={{ color: 'var(--textMuted)' }}>{merchant.category}</p>
             </div>
+            <button onClick={logout} title="Log out" className="p-1.5 rounded-xl transition hover:opacity-70" style={{ color: 'var(--textMuted)' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
