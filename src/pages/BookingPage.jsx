@@ -1,7 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { isDemo } from '../api'
 
 const PLATFORM_FEE = 0.5
+
+function generateSlots(openTime, closeTime, duration) {
+  const slots = []
+  const [oH, oM] = openTime.split(':').map(Number)
+  const [cH, cM] = closeTime.split(':').map(Number)
+  const openMin = oH * 60 + oM, closeMin = cH * 60 + cM
+  for (let t = openMin; t + duration <= closeMin; t += 15) {
+    const h = Math.floor(t / 60), m = t % 60
+    slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
+  }
+  return slots
+}
 
 export default function BookingPage() {
   const { slug } = useParams()
@@ -15,26 +28,40 @@ export default function BookingPage() {
   const [availableSlots, setAvailableSlots] = useState([])
   const [submitting, setSubmitting] = useState(false)
 
-  // Fetch merchant data from API
+  // Load merchant data
   useEffect(() => {
+    if (isDemo) {
+      try {
+        const stored = JSON.parse(localStorage.getItem('serveup_merchant'))
+        if (stored && stored.slug === slug) { setMerchant(stored); setLoading(false); return }
+      } catch {}
+      setError('Not found')
+      setLoading(false)
+      return
+    }
     fetch(`/api/storefront/${slug}`)
-      .then((r) => {
-        if (!r.ok) throw new Error('Not found')
-        return r.json()
-      })
+      .then((r) => { if (!r.ok) throw new Error('Not found'); return r.json() })
       .then(setMerchant)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [slug])
 
-  // Fetch available time slots when date changes
+  // Generate/fetch available time slots
   useEffect(() => {
-    if (!form.date || !selected || !slug) return
+    if (!form.date || !selected || !merchant) return
+    if (isDemo) {
+      const dayMap = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 0 }
+      const dayOfWeek = new Date(form.date + 'T12:00').getDay()
+      const dayAvail = (merchant.availability || []).find((d) => d.enabled && dayMap[d.day] === dayOfWeek)
+      if (dayAvail) setAvailableSlots(generateSlots(dayAvail.open, dayAvail.close, selected.duration))
+      else setAvailableSlots([])
+      return
+    }
     fetch(`/api/storefront/${slug}/slots?date=${form.date}&serviceId=${selected.id}`)
       .then((r) => r.json())
       .then((data) => setAvailableSlots(data.slots || []))
       .catch(() => setAvailableSlots([]))
-  }, [form.date, selected, slug])
+  }, [form.date, selected, slug, merchant])
 
   if (loading) {
     return (
@@ -84,6 +111,28 @@ export default function BookingPage() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (isDemo) {
+        // Demo mode: save booking to localStorage
+        const stored = JSON.parse(localStorage.getItem('serveup_merchant') || '{}')
+        const booking = {
+          id: crypto.randomUUID(),
+          clientName: form.clientName,
+          clientPhone: form.phone,
+          clientEmail: form.email,
+          service: { name: selected.name },
+          servicePrice: selected.price,
+          platformFee: 0.5,
+          date: form.date,
+          time: form.time,
+          status: 'confirmed',
+          paid: true,
+          createdAt: new Date().toISOString(),
+        }
+        stored.bookings = [booking, ...(stored.bookings || [])]
+        localStorage.setItem('serveup_merchant', JSON.stringify(stored))
+        setStep('confirmed')
+        return
+      }
       const res = await fetch(`/api/storefront/${slug}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

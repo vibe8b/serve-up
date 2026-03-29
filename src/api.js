@@ -1,5 +1,8 @@
 let token = null
 
+// Detect if we're on GitHub Pages (no backend available)
+export const isDemo = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
+
 async function request(method, path, body) {
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
