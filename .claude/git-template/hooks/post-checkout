@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# git template hook: post-checkout
+# Fires after: git clone, git checkout, git switch
+# Purpose: Bootstrap .claude/ skeleton in every new repo
+
+# Only run on branch checkouts (not file checkouts)
+# $3 = 1 means branch checkout, 0 means file checkout
+[ "$3" = "0" ] && exit 0
+
+# Only run if this looks like the first checkout (no .claude dir yet)
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+CLAUDE_DIR="$REPO_ROOT/.claude"
+GLOBAL_CLAUDE="${HOME}/.claude"
+
+# If .claude already has MASTER_PROMPT.md, skip (already bootstrapped)
+[ -f "$CLAUDE_DIR/MASTER_PROMPT.md" ] && exit 0
+
+echo "🤖 Claude bootstrap: initializing .claude/ for $(basename "$REPO_ROOT")"
+
+# Create .claude directory structure
+mkdir -p "$CLAUDE_DIR/commands"
+
+# Copy from global Claude config if available
+if [ -d "$GLOBAL_CLAUDE" ]; then
+  # Copy MASTER_PROMPT.md
+  [ -f "$GLOBAL_CLAUDE/MASTER_PROMPT.md" ] && \
+    cp "$GLOBAL_CLAUDE/MASTER_PROMPT.md" "$CLAUDE_DIR/MASTER_PROMPT.md"
+
+  # Copy CLAUDE.md if project doesn't have one
+  if [ ! -f "$CLAUDE_DIR/CLAUDE.md" ] && [ -f "$GLOBAL_CLAUDE/CLAUDE.md" ]; then
+    cp "$GLOBAL_CLAUDE/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+  fi
+
+  # Copy command definitions
+  if [ -d "$GLOBAL_CLAUDE/commands" ]; then
+    cp -n "$GLOBAL_CLAUDE/commands/"*.md "$CLAUDE_DIR/commands/" 2>/dev/null
+  fi
+fi
+
+# If no CLAUDE.md exists at all, write a minimal pointer
+if [ ! -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+  cat > "$CLAUDE_DIR/CLAUDE.md" << 'EOF'
+# Project Instructions
+
+## ⚡ Session Bootstrap
+Read `.claude/MASTER_PROMPT.md` at session start. Apply all operating principles.
+If AGENTS.md is missing, run `/metaprompt` to generate project-specific agent roster.
+
+## Commands
+- `/metaprompt` — generate hyperfocused agent roster for this project's stack
+- `/todo [items]` — add tasks with T1/T2/T3 tier classification
+- `/todo grind` — autonomous execution mode
+- `/mockup` — generate UI mockup + email status report (iOS projects)
+
+See global ~/.claude/CLAUDE.md for full instructions.
+EOF
+fi
+
+# Add .claude/ to .gitignore if gitignore exists (settings.local.json must not be committed)
+GITIGNORE="$REPO_ROOT/.gitignore"
+if [ -f "$GITIGNORE" ]; then
+  grep -q "\.claude/settings\.local\.json" "$GITIGNORE" || \
+    echo ".claude/settings.local.json" >> "$GITIGNORE"
+fi
+
+echo "✅ Claude bootstrap complete: $(ls "$CLAUDE_DIR/commands/" 2>/dev/null | wc -l | tr -d ' ') commands, MASTER_PROMPT loaded"
