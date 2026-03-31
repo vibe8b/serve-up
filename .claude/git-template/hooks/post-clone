@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# git template hook: post-clone (git 2.36+ supports this natively)
+# For older git versions this is called via post-checkout with $3=1 on initial branch
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+exec "$(dirname "$0")/post-checkout" "" "" 1
