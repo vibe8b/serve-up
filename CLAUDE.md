@@ -10,8 +10,24 @@ At the start of EVERY session, before responding to any message:
 2. **Read `.claude/AGENTS.md`** if it exists — load the agent roster
    - If AGENTS.md is missing and the project has substantial code, auto-run `/metaprompt` logic silently and create it
 3. **Read `todo.md`** if it exists — orient on current task state
-4. **Confirm context** with a one-liner: `✅ [ProjectName] | Branch: X | Tasks: X/X | Agents: X loaded`
-   - Skip this line if session is clearly mid-conversation (not a fresh open)
+4. **Confirm context** with a structured summary table:
+
+```
+✅ [ProjectName] — [date]
+
+| # | Task | Status | Summary |
+|---|------|--------|---------|
+| 1 | Auth system | ✅ done | JWT + refresh tokens, 3 endpoints |
+| 2 | Dashboard | 🔄 wip | Charts wired, filters pending |
+| 3 | Dark mode | ⏳ pending | Not started |
+| 4 | Login bug | 🚫 blocked | Missing env var SUPABASE_URL |
+```
+
+Rules:
+- Only show the **latest batch** from todo.md (not all history)
+- If no todo.md exists, just output: `✅ [ProjectName] | Agents: X loaded | No tasks yet`
+- **Never include git branch/commit** unless the task explicitly involves git (pushing, branching, PRs, etc.)
+- Skip this table entirely if session is clearly mid-conversation (not a fresh open)
 
 This is non-negotiable. No task executes before bootstrap is complete.
 
