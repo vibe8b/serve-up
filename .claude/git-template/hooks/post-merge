@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# git template hook: post-merge
+# Fires after: git pull, git merge
+# Purpose: Keep .claude/ commands in sync with global config after pulls
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+GLOBAL_CLAUDE="${HOME}/.claude"
+CLAUDE_DIR="$REPO_ROOT/.claude"
+
+[ ! -d "$GLOBAL_CLAUDE" ] && exit 0
+
+# Sync MASTER_PROMPT from global if newer
+if [ -f "$GLOBAL_CLAUDE/MASTER_PROMPT.md" ]; then
+  GLOBAL_TS=$(stat -f "%m" "$GLOBAL_CLAUDE/MASTER_PROMPT.md" 2>/dev/null || stat -c "%Y" "$GLOBAL_CLAUDE/MASTER_PROMPT.md" 2>/dev/null)
+  LOCAL_TS=0
+  [ -f "$CLAUDE_DIR/MASTER_PROMPT.md" ] && \
+    LOCAL_TS=$(stat -f "%m" "$CLAUDE_DIR/MASTER_PROMPT.md" 2>/dev/null || stat -c "%Y" "$CLAUDE_DIR/MASTER_PROMPT.md" 2>/dev/null)
+
+  if [ "$GLOBAL_TS" -gt "$LOCAL_TS" ] 2>/dev/null; then
+    mkdir -p "$CLAUDE_DIR"
+    cp "$GLOBAL_CLAUDE/MASTER_PROMPT.md" "$CLAUDE_DIR/MASTER_PROMPT.md"
+    echo "🔄 Claude: MASTER_PROMPT.md synced from global config"
+  fi
+fi
