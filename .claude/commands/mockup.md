@@ -1,12 +1,12 @@
 ---
-description: Generate a pixel-accurate HTML mockup of all IRN screens and email it to eitanbarzeski@gmail.com
+description: Generate a pixel-accurate HTML mockup of all IRN screens + project status report, email to eitanbarzeski@gmail.com
 ---
 
 You are acting as **gfxgod** — a premium mobile UI design specialist. Your output must be production-grade, source-accurate, and visually polished.
 
 ## Step 1 — Load design skills
 
-Read these files for design principles:
+Read these files for design principles (skip if not found, continue):
 - `.agents/skills/mobile-design/SKILL.md`
 - `.agents/skills/ui-ux-pro-max/SKILL.md`
 
@@ -22,7 +22,17 @@ Read each of these files in full:
 If there is an active workout view, also read:
 - `IronLog/Views/Routines/RoutineListView.swift`
 
-## Step 3 — Generate high-fidelity HTML mockup
+## Step 3 — Read project status
+
+Read `todo.md` (if present). Extract:
+- Latest BATCH ID + summary
+- Done/WIP/Pending/Blocked counts
+- Overall completion %
+- Any blocked items with reasons
+
+Also check `git log --oneline -5` for recent commits if accessible.
+
+## Step 4 — Generate high-fidelity HTML mockup
 
 Build a **single self-contained HTML file** with:
 
@@ -55,34 +65,37 @@ Build a **single self-contained HTML file** with:
 - Accent glow on active tab icon: `filter: drop-shadow(0 0 6px #B09CF0)`
 - Session cards have `1px solid rgba(176,156,240,0.22)` border (from accentColor.opacity(0.2) in code)
 
-## Step 4 — Save HTML to temp file
+## Step 5 — Save HTML to temp file
 
-```bash
-MOCKUP_PATH="/tmp/irn_mockup_$(date +%Y%m%d_%H%M%S).html"
-cat > "$MOCKUP_PATH" << 'HTMLEOF'
-<paste generated HTML here>
-HTMLEOF
-echo "Saved to $MOCKUP_PATH"
+Write the HTML file using the Write tool to:
 ```
+/tmp/irn_mockup_<YYYYMMDD_HHMMSS>.html
+```
+Note the exact path.
 
-Or write the file directly using the Write tool, then note its path.
-
-## Step 5 — Email it
+## Step 6 — Email it (includes status)
 
 ```bash
 python3 scripts/send_mockup.py "$MOCKUP_PATH"
 ```
 
-If `GMAIL_APP_PASSWORD` is not set, remind the user to run the one-time setup:
+The script automatically:
+- Reads `todo.md` for project status
+- Reads `.git/HEAD` for branch info
+- Builds a combined HTML email with status dashboard + mockups
+- Sends to `eitanbarzeski@gmail.com`
+
+If `GMAIL_APP_PASSWORD` is not set:
 ```bash
 python3 scripts/setup_gmail_creds.py
 ```
 
-## Step 6 — Report
+## Step 7 — Report
 
 Print:
 ```
-✅ IRN mockup generated and emailed to eitanbarzeski@gmail.com
+✅ IRN mockup + status report emailed to eitanbarzeski@gmail.com
    Screens: Login · Dashboard · Active Workout · Log · Profile
+   Status: X/X tasks done (X%) | Blocked: X
    File: <path>
 ```
